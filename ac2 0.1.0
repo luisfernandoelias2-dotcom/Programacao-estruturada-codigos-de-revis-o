@@ -1,0 +1,17 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct{
+char nomes [100];
+float notas [4];
+int ra;
+char disciplina [6];
+float media;
+char status [20];
+}Alunos;
+
+Alunos a;
+
+void sistema_academico ( ){
+printf ("SISTEMA ACADEMICO BRAWL STARS")
+}
