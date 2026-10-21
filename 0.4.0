@@ -1,0 +1,55 @@
+
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct {
+    char nome[50];
+    int codigo;
+    int carga_horaria;
+} Disciplina;
+
+typedef struct {
+    char nome[100];
+    float notas[4];
+    int ra;
+    Disciplina disciplina;
+    float media;
+} Alunos;
+
+Alunos a;
+
+void sistema_academico() {
+    printf("SISTEMA ACADEMICO BRAWL STARS\n");
+}
+
+// Função para calcular a média do aluno
+
+void calcular_media(Alunos *a) {
+    float soma = 0;
+    int i;
+
+    for (i = 0; i < 4; i++) {
+        soma += a->notas[i];
+    }
+
+    a->media = soma / 4;
+
+    if (a->media >= 5.0) {
+        printf("Status: Aprovado!\n");
+    } else {
+        printf("Status: Reprovado!\n");
+    }
+}
+
+
+Alunos *buscar_aluno(Alunos *a, int n, int ra) {
+    int i;
+
+    for (i = 0; i < n; i++) {
+        if ((a + i)->ra == ra) {
+            return (a + i);
+        }
+    }
+
+    return NULL;
+}
