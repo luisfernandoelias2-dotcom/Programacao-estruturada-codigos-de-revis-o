@@ -1,0 +1,489 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct {
+    char nome[50];
+    int codigo;
+    int carga_horaria;
+} Disciplina;
+
+typedef struct {
+    char nome[100];
+    float notas[4];
+    int ra;
+    Disciplina disciplina;
+    float media;
+} Alunos;
+
+//vetor dinamico de alunos
+Alunos *alunos = NULL;
+int quant = 0;
+
+//vetor dinamico de disciplinas
+Disciplina *disciplinas = NULL;
+int quant_disciplinas = 0;
+
+
+Disciplina *buscar_disciplina(Disciplina *d, int n, int codigo);
+Alunos *buscar_aluno(Alunos *a, int n, int ra);
+void modificar_nota_direta(Alunos **ptr_para_ponteiro, int indice_nota, float nova_nota);
+
+
+Alunos *buscar_aluno(Alunos *a, int n, int ra) {
+      int i;
+
+    for (i = 0; i < n; i++) {
+        if ((a + i)->ra == ra) {
+            return (a + i);
+        }
+    }
+
+    return NULL;
+}
+
+void calcular_media(Alunos *a) {
+    float soma = 0;
+    int i;
+
+    for (i = 0; i < 4; i++) {
+        soma += a->notas[i];
+    }
+
+    a->media = soma / 4;
+
+    printf("Media: %.2f\n", a->media);
+
+    if (a->media >= 5.0) {
+        printf("Status: Aprovado!\n");
+    } 
+    else {
+        printf("Status: Reprovado!\n");
+    }
+}
+
+
+
+void cadastrarAluno() {
+    Alunos *cont;
+
+    cont = (Alunos *) realloc(alunos, (quant + 1) * sizeof(Alunos));
+
+    if (cont == NULL) {
+        printf("Erro ao alocar memoria!\n");
+        return;
+    }
+
+    alunos = cont;
+
+    Alunos *a = &alunos[quant];
+
+    printf("\n===== CADASTRO DE ALUNO =====\n");
+
+    printf("Nome: ");
+    scanf("%s", a->nome);
+
+    printf("RA: ");
+    scanf("%d", &a->ra);
+
+    printf("\n===== DISCIPLINA =====\n");
+
+    printf("Nome da disciplina: ");
+    scanf("%s", a->disciplina.nome);
+
+    printf("Codigo da disciplina: ");
+    scanf("%d", &a->disciplina.codigo);
+
+    printf("Carga horaria: ");
+    scanf("%d", &a->disciplina.carga_horaria);
+
+    printf("\n===== NOTAS =====\n");
+
+    for (int i = 0; i < 4; i++) {
+        printf("AC %d: ", i + 1);
+        scanf("%f", &a->notas[i]);
+    }
+
+    calcular_media(a);
+
+    quant++;
+
+    printf("\nAluno cadastrado com sucesso!\n");
+}
+
+void listar_alunos () {
+    int i;
+
+    if (quant == 0) {
+        printf("\nNenhum aluno cadastrado.\n");
+        return;
+    }
+
+    printf("\n====LISTA DE ALUNOS==== \n");
+
+    for (i = 0; i < quant; i++) {
+        printf("\nAluno %d\n", i + 1);
+        printf("Nome: %s\n", (alunos + i)->nome);
+        printf("RA: %d\n", (alunos + i)->ra);
+        printf("Media: %.2f\n", (alunos + i)->media);
+        printf("Status: %s\n",
+               (alunos + i)->media >= 5.0
+               ? "Aprovado" : "Reprovado");
+    }
+}
+
+
+void listar_disciplinas() {
+    int i;
+
+   if (quant_disciplinas == 0) {
+        printf("\nNenhuma disciplina cadastrada.\n");
+        return;
+    }
+
+    printf("\n===== LISTA DE DISCIPLINAS =====\n");
+
+    for (i = 0; i < quant_disciplinas; i++) {
+        printf("\nDisciplina %d\n", i + 1);
+
+        printf("Nome: %s\n", (disciplinas + i)->nome);
+
+        printf("Codigo: %d\n", (disciplinas + i)->codigo);
+
+        printf("Carga horaria: %d horas\n", (disciplinas + i)->carga_horaria);
+    }
+}
+
+void consultar_carga_horaria() {
+    int codigo;
+    Disciplina *d;
+
+    printf("\n===== CONSULTAR CARGA HORARIA =====\n");
+    printf("Digite o codigo da disciplina: ");
+    scanf("%d", &codigo);
+
+    d = buscar_disciplina(disciplinas, quant_disciplinas, codigo);
+
+    if (d != NULL) {
+        printf("\nDisciplina: %s\n", d->nome);
+        printf("Codigo: %d\n", d->codigo);
+        printf("Carga horaria: %d horas\n", d->carga_horaria);
+    } else {
+        printf("\nDisciplina nao encontrada!\n");
+    }
+}
+
+Disciplina *buscar_disciplina(Disciplina *d, int n, int codigo) {
+    int i;
+
+    for (i = 0; i < n; i++) {
+        if ((d + i)->codigo == codigo) {
+            return (d + i);
+        }
+    }
+
+    return NULL;
+}
+
+
+void cadastrarDisciplina() {
+    Disciplina nova;
+    Disciplina *temp;
+    Disciplina *d;
+
+    printf("\n===== CADASTRO DE DISCIPLINA =====\n");
+
+    printf("Nome da disciplina: ");
+    scanf("%s", nova.nome);
+
+    printf("Codigo da disciplina: ");
+    scanf("%d", &nova.codigo);
+
+    if (buscar_disciplina(disciplinas, quant_disciplinas, nova.codigo) != NULL) {
+        printf("Ja existe uma disciplina com esse codigo!\n");
+        return;
+    }
+
+    printf("Carga horaria: ");
+    scanf("%d", &nova.carga_horaria);
+
+    temp = (Disciplina *) realloc(disciplinas, (quant_disciplinas + 1) * sizeof(Disciplina));
+
+    if (temp == NULL) {
+        printf("Erro ao alocar memoria!\n");
+        return;
+    }
+
+    disciplinas = temp;
+
+    d = disciplinas + quant_disciplinas;
+    *d = nova;
+
+    quant_disciplinas++;
+
+    printf("\nDisciplina cadastrada com sucesso!\n");
+}
+
+void consultar_aluno() {
+    int ra;
+    Alunos *a;
+
+    printf("\n===== CONSULTAR ALUNO =====\n");
+    printf("Digite o RA do aluno: ");
+    scanf("%d", &ra);
+
+    a = buscar_aluno(alunos, quant, ra);
+
+    if (a != NULL) {
+        printf("\nNome: %s\n", a->nome);
+        printf("RA: %d\n", a->ra);
+        printf("Media: %.2f\n", a->media);
+
+        if (a->media >= 5.0) {
+            printf("Status: Aprovado!\n");
+        } else {
+            printf("Status: Reprovado!\n");
+        }
+    } else {
+        printf("\nAluno nao encontrado!\n");
+    }
+}
+
+
+void menu_alunos() {
+    int opcao;
+
+    do {
+        printf("\n===== MENU DE ALUNOS =====\n");
+        printf("1 - Cadastrar aluno\n");
+        printf("2 - Listar alunos\n");
+        printf("3 - Consultar aluno pelo RA\n");
+        printf("4 - Atualizar nota\n"); 
+        printf("0 - Voltar ao menu principal\n");
+        printf("\nEscolha: ");
+        scanf("%d", &opcao);
+
+        switch (opcao) {
+            case 1:
+                cadastrarAluno();
+                break;
+
+            case 2:
+                listar_alunos();
+                break;
+
+            case 3:
+                consultar_aluno();
+                break;
+
+            case 4: { 
+                int ra, num_nota;
+                float nova_nota;
+                
+                printf("\n===== ATUALIZAR NOTA VIA PONTEIRO DUPLO =====\n");
+                printf("Digite o RA do aluno: ");
+                scanf("%d", &ra);
+
+                // Busca o aluno usando a sua função original
+                Alunos *a = buscar_aluno(alunos, quant, ra);
+                
+                if (a != NULL) {
+                    printf("Aluno encontrado: %s\n", a->nome);
+                    printf("Qual nota deseja alterar (1 a 4)? ");
+                    scanf("%d", &num_nota);
+                    
+                    if (num_nota >= 1 && num_nota <= 4) {
+                        printf("\nDigite a nova nota: ");
+                        scanf("%f", &nova_nota);
+                        
+                        modificar_nota_direta(&a, num_nota - 1, nova_nota);
+                        
+                        printf("Nota atualizada com sucesso!\n");
+                    } else {
+                        printf("Nota invalida! Escolha de 1 a 4.\n");
+                    }
+                } else {
+                    printf("Aluno nao encontrado!\n");
+                }
+                break;
+            }
+
+            case 0:
+                printf("Voltando ao menu principal...\n");
+                break;
+
+            default:
+                printf("Opcao invalida!\n");
+                break;
+        }
+
+    } while (opcao != 0);
+}
+
+
+
+void menu_disciplinas() {
+    int opcao;
+
+    do {
+        printf("\n===== MENU DE DISCIPLINAS =====\n");
+        printf("1 - Cadastrar disciplina\n");
+        printf("2 - Listar disciplinas\n");
+        printf("3 - Buscar disciplina pelo codigo\n");
+        printf("4 - Consultar carga horaria\n");
+        printf("0 - Voltar ao menu principal\n");
+        printf("\nEscolha: ");
+        scanf("%d", &opcao);
+
+        switch (opcao) {
+            case 1:
+                cadastrarDisciplina();
+                break;
+
+            case 2:
+                listar_disciplinas();
+                break;
+
+            case 3: {
+                int codigo;
+                Disciplina *d;
+
+                printf("Digite o codigo da disciplina: ");
+                scanf("%d", &codigo);
+
+                d = buscar_disciplina(
+                    disciplinas, quant_disciplinas, codigo
+                );
+
+                if (d != NULL) {
+                    printf("\nNome: %s\n", d->nome);
+                    printf("Codigo: %d\n", d->codigo);
+                    printf("Carga horaria: %d horas\n",
+                           d->carga_horaria);
+                } else {
+                    printf("\nDisciplina nao encontrada!\n");
+                }
+                break;
+            }
+
+            case 4:
+                consultar_carga_horaria();
+                break;
+
+            case 0:
+                printf("Voltando ao menu principal...\n");
+                break;
+
+            default:
+                printf("Opcao invalida!\n");
+                break;
+        }
+
+    } while (opcao != 0);
+}
+
+
+void sistema_academico() {
+    int opcao;
+
+    do {
+        printf("\n===== SISTEMA ACADEMICO FACENS =====\n");
+        printf("1 - Menu de alunos\n");
+        printf("2 - Menu de disciplinas\n");
+        printf("0 - Sair\n");
+        printf("\nescolha: ");
+        scanf("%d", &opcao);
+
+        switch (opcao) {
+            case 1:
+                menu_alunos();
+                break;
+
+            case 2:
+                menu_disciplinas();
+                break;
+
+            case 0:
+                printf("Encerrando o sistema...\n");
+                break;
+
+            default:
+                printf("Opcao invalida!\n");
+                break;
+        }
+
+    } while (opcao != 0);
+}
+
+
+void salvar_dados() {
+    FILE *arq = fopen("dados_sistema.bin", "wb");
+    if (arq == NULL) {
+        printf("Erro ao abrir arquivo para salvar!\n");
+        return;
+    }
+
+    fwrite(&quant, sizeof(int), 1, arq);
+    fwrite(&quant_disciplinas, sizeof(int), 1, arq);
+
+    if (quant > 0) {
+        fwrite(alunos, sizeof(Alunos), quant, arq);
+    }
+    if (quant_disciplinas > 0) {
+        fwrite(disciplinas, sizeof(Disciplina), quant_disciplinas, arq);
+    }
+
+    fseek(arq, 0, SEEK_END);
+    long tamanho = ftell(arq);
+    printf("\n[Arquivo] Sistema salvo com sucesso (%ld bytes).\n", tamanho);
+
+    fclose(arq);
+}
+
+void carregar_dados() {
+    FILE *arq = fopen("dados_sistema.bin", "rb");
+    if (arq == NULL) {
+       
+        return;
+    }
+    
+    fread(&quant, sizeof(int), 1, arq);
+    fread(&quant_disciplinas, sizeof(int), 1, arq);
+
+    if (quant > 0) {
+        alunos = (Alunos *) malloc(quant * sizeof(Alunos));
+    
+        if (alunos != NULL) {
+            fread(alunos, sizeof(Alunos), quant, arq);
+        }
+    }
+
+    if (quant_disciplinas > 0) {
+        disciplinas = (Disciplina *) malloc(quant_disciplinas * sizeof(Disciplina));
+
+        if (disciplinas != NULL) {
+            fread(disciplinas, sizeof(Disciplina), quant_disciplinas, arq);
+        }
+    }
+
+    fclose(arq);
+}
+
+
+void modificar_nota_direta(Alunos **ptr_para_ponteiro, int indice_nota, float nova_nota) {
+    (*ptr_para_ponteiro)->notas[indice_nota] = nova_nota;
+    
+    calcular_media(*ptr_para_ponteiro);
+}
+
+int main() {
+    carregar_dados();
+
+    sistema_academico();
+
+    salvar_dados();
+
+    free(alunos);
+    free(disciplinas);
+
+    return 0;
+}
